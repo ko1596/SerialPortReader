@@ -33,7 +33,7 @@ int main(void)
 	TimeOuts.ReadTotalTimeoutConstant = 100;
 
 	TimeOuts.WriteTotalTimeoutMultiplier = 1;
-	TimeOuts.WriteTotalTimeoutConstant = 1;/
+	TimeOuts.WriteTotalTimeoutConstant = 1;
 	SetCommTimeouts(hCom, &TimeOuts);
  
 	/*****************************************setting Serial Port***************************/
