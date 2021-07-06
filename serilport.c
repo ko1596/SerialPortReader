@@ -5,13 +5,12 @@ HANDLE hCom;
  
 int main(void)
 {
-	hCom = CreateFile(TEXT("com5"),//COM1口
-		GENERIC_READ, //允许读
-		0, //指定共享属性，由于串口不能共享，所以该参数必须为0
+	hCom = CreateFile(TEXT("com5"),//set COM5
+		GENERIC_READ, //allow read
+		0,
 		NULL,
-		OPEN_EXISTING, //打开而不是创建
- 
-		FILE_ATTRIBUTE_NORMAL, //属性描述，该值为FILE_FLAG_OVERLAPPED，表示使用异步I/O，该参数为0，表示同步I/O操作
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, 
 		NULL);
  
 	if (hCom == INVALID_HANDLE_VALUE)
@@ -24,36 +23,36 @@ int main(void)
 		printf("open COM sucessused!\n");
 	}
  
-	SetupComm(hCom, 1024, 1024); //输入缓冲区和输出缓冲区的大小都是1024
+	SetupComm(hCom, 1024, 1024); //input and outputbuffer
  
-	/*********************************超时设置**************************************/
+	/*********************************setting time out**************************************/
 	COMMTIMEOUTS TimeOuts;
-	//设定读超时
-	TimeOuts.ReadIntervalTimeout = MAXDWORD;//读间隔超时
-	TimeOuts.ReadTotalTimeoutMultiplier = 0;//读时间系数
-	TimeOuts.ReadTotalTimeoutConstant = 0;//读时间常量
-	//设定写超时
-	TimeOuts.WriteTotalTimeoutMultiplier = 1;//写时间系数
-	TimeOuts.WriteTotalTimeoutConstant = 1;//写时间常量
-	SetCommTimeouts(hCom, &TimeOuts); //设置超时
+
+	TimeOuts.ReadIntervalTimeout = MAXDWORD;
+	TimeOuts.ReadTotalTimeoutMultiplier = 1;
+	TimeOuts.ReadTotalTimeoutConstant = 100;
+
+	TimeOuts.WriteTotalTimeoutMultiplier = 1;
+	TimeOuts.WriteTotalTimeoutConstant = 1;/
+	SetCommTimeouts(hCom, &TimeOuts);
  
-	/*****************************************配置串口***************************/
+	/*****************************************setting Serial Port***************************/
 	DCB dcb;
 	GetCommState(hCom, &dcb);
-	dcb.BaudRate = 115200; //波特率为9600
-	dcb.ByteSize = 8; //每个字节有8位
-	dcb.Parity = NOPARITY; //无奇偶校验位
-	dcb.StopBits = ONESTOPBIT; //一个停止位
+	dcb.BaudRate = 115200; //set bit rate to 115200
+	dcb.ByteSize = 8; //set byte size
+	dcb.Parity = NOPARITY; //set parity
+	dcb.StopBits = ONESTOPBIT; //set stop bit
 	SetCommState(hCom, &dcb);
  
-	DWORD wCount;//实际读取的字节数
+	DWORD wCount;//the real byte size
 	boolean bReadStat;
  
-	char str[2] = { 0 };
+	char str[1] = { 0 };
  
 	while (1)
 	{
-		//PurgeComm(hCom, PURGE_TXCLEAR | PURGE_RXCLEAR); //清空缓冲区
+		//PurgeComm(hCom, PURGE_TXCLEAR | PURGE_RXCLEAR); //clear buffer
 		bReadStat = ReadFile(hCom, str, sizeof(str), &wCount, NULL);
  
 		if (!bReadStat)
@@ -66,7 +65,6 @@ int main(void)
 			str[1] = '\0';
 			printf("%c", str[0]);
 		}
-		Sleep(10);
 	}
  
 	CloseHandle(hCom);
